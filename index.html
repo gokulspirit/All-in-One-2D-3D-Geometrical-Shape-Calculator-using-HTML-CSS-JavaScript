@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shape Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #444;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #222;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+      border: 1px dashed #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Shape Calculator</h2>
+    <label for="shape">Select Shape:</label>
+    <select id="shape" onchange="renderInputs()">
+      <option value="">-- Choose a shape --</option>
+      <option value="circle">Circle</option>
+      <option value="triangle">Triangle</option>
+      <option value="square">Square</option>
+      <option value="rectangle">Rectangle</option>
+      <option value="pentagon">Pentagon</option>
+      <option value="hexagon">Hexagon</option>
+      <option value="octagon">Octagon</option>
+      <option value="ellipse">Ellipse</option>
+      <option value="sphere">Sphere</option>
+      <option value="cube">Cube</option>
+      <option value="cuboid">Cuboid</option>
+      <option value="cylinder">Cylinder</option>
+      <option value="cone">Cone</option>
+      <option value="pyramid">Pyramid</option>
+    </select>
+    
+    <div id="inputs"></div>
+    <button onclick="calculate()">Calculate</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const shapeSelect = document.getElementById("shape");
+    const inputsDiv = document.getElementById("inputs");
+    const resultDiv = document.getElementById("result");
+
+    const shapeInputs = {
+      circle: [{ label: "Radius (r)", id: "r" }],
+      triangle: [
+        { label: "Side a", id: "a" },
+        { label: "Side b", id: "b" },
+        { label: "Side c", id: "c" },
+        { label: "Base", id: "base" },
+        { label: "Height", id: "height" }
+      ],
+      square: [{ label: "Side", id: "side" }],
+      rectangle: [
+        { label: "Length", id: "length" },
+        { label: "Width", id: "width" }
+      ],
+      pentagon: [{ label: "Side (regular pentagon)", id: "side" }],
+      hexagon: [{ label: "Side (regular hexagon)", id: "side" }],
+      octagon: [{ label: "Side (regular octagon)", id: "side" }],
+      ellipse: [
+        { label: "Semi-major axis (a)", id: "a" },
+        { label: "Semi-minor axis (b)", id: "b" }
+      ],
+      sphere: [{ label: "Radius (r)", id: "r" }],
+      cube: [{ label: "Side", id: "side" }],
+      cuboid: [
+        { label: "Length", id: "length" },
+        { label: "Width", id: "width" },
+        { label: "Height", id: "height" }
+      ],
+      cylinder: [
+        { label: "Radius (r)", id: "r" },
+        { label: "Height (h)", id: "h" }
+      ],
+      cone: [
+        { label: "Radius (r)", id: "r" },
+        { label: "Height (h)", id: "h" },
+        { label: "Slant height (l)", id: "l" }
+      ],
+      pyramid: [
+        { label: "Base side", id: "baseSide" },
+        { label: "Slant height", id: "slantHeight" },
+        { label: "Height", id: "height" }
+      ]
+    };
+
+    function renderInputs() {
+      const shape = shapeSelect.value;
+      inputsDiv.innerHTML = "";
+      resultDiv.innerHTML = "";
+
+      if (!shape || !shapeInputs[shape]) return;
+
+      shapeInputs[shape].forEach(({ label, id }) => {
+        inputsDiv.innerHTML += `
+          <label for="${id}">${label}</label>
+          <input type="number" id="${id}" min="0" placeholder="Enter ${label.toLowerCase()}" />
+        `;
+      });
+    }
+
+    function calculate() {
+      const shape = shapeSelect.value;
+      resultDiv.innerHTML = "";
+
+      if (!shape) return resultDiv.textContent = "Please select a shape.";
+
+      const values = {};
+      for (const { id } of shapeInputs[shape]) {
+        const val = parseFloat(document.getElementById(id).value);
+        if (isNaN(val) || val <= 0) return resultDiv.textContent = `Please enter valid value for ${id}`;
+        values[id] = val;
+      }
+
+      const π = Math.PI;
+      let res = "";
+
+      switch (shape) {
+        case "circle": {
+          const r = values.r;
+          res = `Area: ${(π * r * r).toFixed(2)}\nCircumference: ${(2 * π * r).toFixed(2)}`;
+          break;
+        }
+        case "triangle": {
+          const { a, b, c, base, height } = values;
+          const area = 0.5 * base * height;
+          const s = (a + b + c) / 2;
+          const heron = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+          res = `Area (base/height): ${area.toFixed(2)}\nArea (Heron's): ${isNaN(heron) ? 'Invalid sides' : heron.toFixed(2)}`;
+          break;
+        }
+        case "square": {
+          const s = values.side;
+          res = `Area: ${(s * s).toFixed(2)}\nPerimeter: ${(4 * s).toFixed(2)}`;
+          break;
+        }
+        case "rectangle": {
+          const { length, width } = values;
+          res = `Area: ${(length * width).toFixed(2)}\nPerimeter: ${(2 * (length + width)).toFixed(2)}`;
+          break;
+        }
+        case "pentagon": {
+          const s = values.side;
+          const area = (5 / 4) * s * s * (1 / Math.tan(π / 5));
+          res = `Area: ${area.toFixed(2)}\nPerimeter: ${(5 * s).toFixed(2)}`;
+          break;
+        }
+        case "hexagon": {
+          const s = values.side;
+          const area = (3 * Math.sqrt(3) / 2) * s * s;
+          res = `Area: ${area.toFixed(2)}\nPerimeter: ${(6 * s).toFixed(2)}`;
+          break;
+        }
+        case "octagon": {
+          const s = values.side;
+          const area = 2 * (1 + Math.sqrt(2)) * s * s;
+          res = `Area: ${area.toFixed(2)}\nPerimeter: ${(8 * s).toFixed(2)}`;
+          break;
+        }
+        case "ellipse": {
+          const { a, b } = values;
+          const area = π * a * b;
+          const peri = π * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b)));
+          res = `Area: ${area.toFixed(2)}\nPerimeter (approx): ${peri.toFixed(2)}`;
+          break;
+        }
+        case "sphere": {
+          const r = values.r;
+          const sa = 4 * π * r * r;
+          const vol = (4 / 3) * π * r ** 3;
+          res = `Surface Area: ${sa.toFixed(2)}\nVolume: ${vol.toFixed(2)}`;
+          break;
+        }
+        case "cube": {
+          const s = values.side;
+          res = `Surface Area: ${(6 * s * s).toFixed(2)}\nVolume: ${(s ** 3).toFixed(2)}`;
+          break;
+        }
+        case "cuboid": {
+          const { length, width, height } = values;
+          const sa = 2 * (length * width + length * height + width * height);
+          const vol = length * width * height;
+          res = `Surface Area: ${sa.toFixed(2)}\nVolume: ${vol.toFixed(2)}`;
+          break;
+        }
+        case "cylinder": {
+          const { r, h } = values;
+          const sa = 2 * π * r * (r + h);
+          const vol = π * r ** 2 * h;
+          res = `Surface Area: ${sa.toFixed(2)}\nVolume: ${vol.toFixed(2)}`;
+          break;
+        }
+        case "cone": {
+          const { r, h, l } = values;
+          const sa = π * r * (r + l);
+          const vol = (1 / 3) * π * r ** 2 * h;
+          res = `Surface Area: ${sa.toFixed(2)}\nVolume: ${vol.toFixed(2)}`;
+          break;
+        }
+        case "pyramid": {
+          const { baseSide, slantHeight, height } = values;
+          const base = baseSide ** 2;
+          const sa = base + 2 * baseSide * slantHeight;
+          const vol = (1 / 3) * base * height;
+          res = `Surface Area: ${sa.toFixed(2)}\nVolume: ${vol.toFixed(2)}`;
+          break;
+        }
+        default:
+          res = "Calculation not available.";
+      }
+
+      resultDiv.textContent = res;
+    }
+  </script>
+</body>
+</html>
